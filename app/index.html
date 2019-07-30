@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ReportBro Designer</title>
+  <meta name="description" content="ReportBro Designer">
+  <link rel="stylesheet" href="node_modules/normalize.css/normalize.css" />
+  <link rel="stylesheet" href="node_modules/spectrum-colorpicker/spectrum.css" />
+  <link rel="stylesheet" href="node_modules/reportbro-designer/dist/reportbro.css" />
+  <link rel="stylesheet" href="static/css/all.min.css" />
+</head>
+<body>
+    <input type="file" id="rbro_upload" style="display:none"/> 
+    <div id="reportbro"></div>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/spectrum-colorpicker/spectrum.js"></script>
+    <script src="node_modules/autosize/dist/autosize.min.js"></script>
+    <script src="node_modules/jsbarcode/dist/JsBarcode.all.min.js"></script>
+    <script src="node_modules/reportbro-designer/dist/reportbro.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var rb = $("#reportbro").reportBro({
+                reportServerUrl: "http://localhost:3001/report/run"
+            });
+            $('.rbroToolButtonContainer').append('<button id="rbro_menu_upload" class="rbroButton rbroMenuButton" title="Upload report"><span class="fas fa-arrow-circle-up"></span><span class="rbroHidden">UPLOAD</span></button>');
+            $('.rbroToolButtonContainer').append('<button id="rbro_menu_download" class="rbroButton rbroMenuButton" title="Download report"><span class="fas fa-arrow-circle-down"></span><span class="rbroHidden">DOWNLOAD</span></button>');
+            $('#rbro_menu_upload').click(function() {
+                $('#rbro_upload').click();
+            });
+            $('#rbro_menu_download').click(function() {
+                var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(rb.getReport()));
+                var downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "report.json");
+                document.body.appendChild(downloadAnchorNode); // required for firefox
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+
+            });
+            function handleFileSelect(evt) {
+                var files = evt.target.files;
+                f = files[0];
+                var reader = new FileReader();
+                reader.onload = (function(file) {
+                    return function(e) {
+                        var definition = null;
+                        try {
+                            definition = JSON.parse(e.target.result);
+                        }  catch(e) {
+                            alert(e);
+                        }
+                        if (definition) {
+                            rb.load(definition.report);
+                        }
+                    };
+                })(f);
+                reader.readAsText(f);
+            }
+            document.getElementById('rbro_upload').addEventListener('change', handleFileSelect, false);
+        });
+    </script>
+</body>
+</html>
