@@ -17,6 +17,7 @@ import (
 	"github.com/jinzhu/now"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/jung-kurt/gofpdf/contrib/barcode"
+	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/cast"
 	"github.com/vincent-petithory/dataurl"
 	"github.com/vjeantet/jodaTime"
@@ -388,7 +389,8 @@ func (self *ImageElement) prepare(ctx Context, pdfDoc *FPDFRB, onlyVerify bool) 
 			log.Println(Error{Message: "errorMsgUnsupportedImageType", ObjectID: self.base().ID, Field: "source"})
 		}
 		if self.ImageKey == "" {
-			self.ImageKey = "image_" + string(self.base().ID) + "." + self.ImageType
+			self.ImageKey = "image_" + strings.ToUpper(fmt.Sprint(uuid.NewV4())) + "." + self.ImageType
+			// self.ImageKey = "image_" + string(self.base().ID) + "." + self.ImageType
 		}
 	}
 	self.Image = ""
