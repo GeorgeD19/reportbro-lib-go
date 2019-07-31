@@ -19,6 +19,33 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:fdfcd99fd77a0d3e3228d4d0b5061d9a611d40cd369ea44e333401b06936fdc4"
+  name = "github.com/araddon/dateparse"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0fb0a474d195a3449cf412ae0176faa193f0ef0b"
+
+[[projects]]
+  digest = "1:42cf657e9a38dbea61b503ec5bc2792abd5027e0395dcc7548a86090701a073a"
+  name = "github.com/boombuler/barcode"
+  packages = [
+    ".",
+    "aztec",
+    "codabar",
+    "code128",
+    "code39",
+    "datamatrix",
+    "ean",
+    "qr",
+    "twooffive",
+    "utils",
+  ]
+  pruneopts = "UT"
+  revision = "3cfea5ab600ae37946be2b763b8ec2c1cf2d272d"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
   digest = "1:69e7139f6d546cc6ffc9ca98e7f4cfe95be479f4044eb30bb92017b5b87c9d40"
   name = "github.com/buger/jsonparser"
   packages = ["."]
@@ -58,12 +85,15 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:68f42b5547c6e12bfe48673cb5e57d0d202616db578ff26161c4505387306fad"
+  digest = "1:fda9636edfd94c03ca7466594b9632a7a989110ca636da131fabce3259a7fb9b"
   name = "github.com/jung-kurt/gofpdf"
-  packages = ["."]
+  packages = [
+    ".",
+    "contrib/barcode",
+  ]
   pruneopts = "UT"
-  revision = "5f4fc286aef52ae082c525ea50afbcbc8c8ec0fc"
-  version = "v2.8.4"
+  revision = "1ad94066897276b1a2a34d099c42a7205c421903"
+  version = "v1.5.4"
 
 [[projects]]
   digest = "1:39de67207027b7374272d5ec9b1bf85457714150ba1263e8d236316629dad570"
@@ -80,6 +110,14 @@
   pruneopts = "UT"
   revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
   version = "v2.1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5b064c863d2532deee1f1c8d25e7370db1090a8522717f35b552a8026434893e"
+  name = "github.com/ruudk/golang-pdf417"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1af4ab5afa58c956c53ed723dee66437498b9415"
 
 [[projects]]
   branch = "master"
@@ -119,12 +157,14 @@
   input-imports = [
     "github.com/Knetic/govaluate",
     "github.com/PaesslerAG/gval",
+    "github.com/araddon/dateparse",
     "github.com/buger/jsonparser",
     "github.com/dustin/go-humanize",
     "github.com/go-chi/chi",
     "github.com/google/uuid",
     "github.com/jinzhu/now",
     "github.com/jung-kurt/gofpdf",
+    "github.com/jung-kurt/gofpdf/contrib/barcode",
     "github.com/lucasb-eyer/go-colorful",
     "github.com/patrickmn/go-cache",
     "github.com/shomali11/util/xconditions",
