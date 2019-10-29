@@ -821,24 +821,26 @@ func (self *report) computeParameters(computedParameters map[int]computedParamet
 					self.errors = append(self.errors, Error{Message: "errorMsgInvalidAvgSumExpression", ObjectID: parameter.ID, Field: "expression", context: parameter.Name})
 				} else {
 					total := 0.0
-					for _, item := range items.([]interface{}) {
-						if itemValue, ok := item.(map[string]interface{})[parameterField]; !ok {
-							self.errors = append(self.errors, Error{Message: "errorMsgInvalidAvgSumExpression", ObjectID: parameter.ID, Field: "expression", context: parameter.Name})
-							break
-						} else {
-							runes := cast.ToString(itemValue)
-							out := []rune(runes)
-							caught := false
-							for i := len(runes); i > 0; i-- {
-								if "," == string(runes[i-1]) {
-									if !caught {
-										caught = true
-										out[i-1] = rune('.')
+					if items != nil {
+						for _, item := range items.([]interface{}) {
+							if itemValue, ok := item.(map[string]interface{})[parameterField]; !ok {
+								self.errors = append(self.errors, Error{Message: "errorMsgInvalidAvgSumExpression", ObjectID: parameter.ID, Field: "expression", context: parameter.Name})
+								break
+							} else {
+								runes := cast.ToString(itemValue)
+								out := []rune(runes)
+								caught := false
+								for i := len(runes); i > 0; i-- {
+									if "," == string(runes[i-1]) {
+										if !caught {
+											caught = true
+											out[i-1] = rune('.')
+										}
 									}
 								}
-							}
 
-							total += cast.ToFloat64(strings.Replace(string(out), ",", "", -1))
+								total += cast.ToFloat64(strings.Replace(string(out), ",", "", -1))
+							}
 						}
 					}
 					if parameter.Type == ParameterTypeAverage {
