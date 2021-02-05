@@ -369,7 +369,16 @@ func (self *ImageElement) prepare(ctx Context, pdfDoc *FPDFRB, onlyVerify bool) 
 		}
 		dataURL, _ := dataurl.DecodeString(imgDataB64)
 		extensions, _ := mime.ExtensionsByType(dataURL.MediaType.ContentType())
-		self.ImageType = strings.Replace(extensions[0], ".", "", -1)
+		invalid := map[string]string{
+			".":    "",
+			".jpe": ".jpg",
+			"jpe":  "jpg",
+		}
+		imageType := extensions[0]
+		for s, r := range invalid {
+			imageType = strings.Replace(imageType, s, r, -1)
+		}
+		self.ImageType = imageType
 		imgData, _ := b64.StdEncoding.DecodeString(strings.Replace(imgDataB64, "^data:image/.+;base64,", "", -1))
 		self.ImageFP = imgData
 	} else if isURL {
