@@ -5,20 +5,27 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 
 	reportbro "github.com/GeorgeD19/reportbro-lib-go"
 )
 
 func main() {
-	files := []string{
-		"blank",
-		"certificate",
-		"contract",
-		"deliveryslip",
-		"invoice",
+	var files []string
+
+	err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
+		if filepath.Ext(path) == ".json" && !strings.HasPrefix(path, ".") {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		panic(err)
 	}
+
 	for _, fileName := range files {
-		file, err := ioutil.ReadFile(fileName + ".json")
+		file, err := ioutil.ReadFile(fileName)
 		if err != nil {
 			panic(err)
 		}

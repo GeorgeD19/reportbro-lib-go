@@ -45,6 +45,7 @@ type Container struct {
 	PageY                 float64
 	FirstElementOffsetY   float64
 	UsedBandHeight        float64
+	ManualPageBreak       bool
 }
 
 func (self *Container) base() *Container {
@@ -93,10 +94,22 @@ func (self *Container) prepare(ctx Context, pdfDoc *FPDFRB, onlyVerify bool) {
 	}
 
 	if pdfDoc != nil {
+		y := make([]float64, len(self.SortedElements))
+		zIndex := make([]int, len(self.SortedElements))
+		for key, sortedElement := range self.SortedElements {
+			y[key] = sortedElement.base().Y
+			zIndex[key] = sortedElement.base().ZIndex
+		}
+
 		sort.Slice(self.SortedElements, func(i, j int) bool {
 			return (self.SortedElements[i].base().Y < self.SortedElements[j].base().Y)
 		})
-		// predecessors are only needed for rendering pdf document
+
+		sort.Slice(self.SortedElements, func(i, j int) bool {
+			return (self.SortedElements[i].base().ZIndex < self.SortedElements[j].base().ZIndex)
+		})
+
+		// // predecessors are only needed for rendering pdf document
 		for i, elem := range self.SortedElements {
 			for _, j := range pyRange(i-1, -1, -1) {
 				elem2 := self.SortedElements[j]
@@ -141,7 +154,9 @@ func (self *Container) createRenderElements(containerHeight float64, ctx Context
 	completedElements := map[int]bool{}
 
 	self.RenderElementsCreated = false
-	setExplicitPageBreak := false
+	self.ManualPageBreak = false
+	// setExplicitPageBreak := false
+	var NextOffsetY *float64
 	for newPage == false && i < len(self.SortedElements) {
 		elem := self.SortedElements[i]
 		if elem.hasUncompletedPredecessor(completedElements) {
@@ -154,8 +169,8 @@ func (self *Container) createRenderElements(containerHeight float64, ctx Context
 					self.SortedElements = removeElement(self.SortedElements, i)
 					elemDeleted = true
 					newPage = true
-					setExplicitPageBreak = true
-					self.PageY = elem.base().Y
+					self.ManualPageBreak = true
+					NextOffsetY = &elem.base().Y
 				} else {
 					self.SortedElements = make([]DocElementBaseProvider, 0)
 					return true
@@ -167,17 +182,13 @@ func (self *Container) createRenderElements(containerHeight float64, ctx Context
 					// element is on same page as predecessor element(s) so offset is relative to predecessors
 					offsetY = elem.base().GetOffsetY()
 				} else {
-					if self.AllowPageBreak {
-						if elem.base().FirstRenderElement && self.ExplicitPageBreak {
-							offsetY = elem.base().Y - self.base().PageY
-						} else {
-							offsetY = 0
-						}
-					} else {
+					if elem.base().FirstRenderElement {
 						offsetY = elem.base().Y - self.FirstElementOffsetY
 						if offsetY < 0 {
 							offsetY = 0
 						}
+					} else {
+						offsetY = 0
 					}
 				}
 				var renderElem DocElementBaseProvider
@@ -205,6 +216,12 @@ func (self *Container) createRenderElements(containerHeight float64, ctx Context
 					complete = true
 				}
 
+				if !complete && NextOffsetY == nil {
+					// in case we continue rendering on the next page the first element which is not complete
+					// will define the offset-y for the next page
+					NextOffsetY = &elem.base().Y
+				}
+
 				if complete {
 					completedElements[elem.base().ID] = true
 					self.SortedElements = removeElement(self.SortedElements, i)
@@ -217,11 +234,9 @@ func (self *Container) createRenderElements(containerHeight float64, ctx Context
 		}
 	}
 
-	// in case of manual page break the element on the next page is positioned relative
-	// to page break position
-	self.ExplicitPageBreak = true
-	if self.AllowPageBreak {
-		self.ExplicitPageBreak = setExplicitPageBreak
+	self.FirstElementOffsetY = 0
+	if NextOffsetY != nil {
+		self.FirstElementOffsetY = *NextOffsetY
 	}
 
 	if len(self.SortedElements) > 0 {

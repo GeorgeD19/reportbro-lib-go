@@ -5,6 +5,8 @@ import (
 	b64 "encoding/base64"
 	"fmt"
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"mime"
 	"os"
@@ -67,6 +69,7 @@ type DocElementBase struct {
 	Complete               bool
 	TableElement           bool
 	BorderColor            Color
+	ZIndex                 int
 }
 
 func (self *DocElementBase) base() *DocElementBase {
@@ -92,6 +95,7 @@ func (self *DocElementBase) init(report *report, data map[string]interface{}) {
 	self.Successors = make([]DocElementBaseProvider, 0)
 	self.Border = BorderNone
 	self.SortOrder = 1 // sort order for elements with same "y"-value
+	self.ZIndex = 0
 }
 
 func (self *DocElementBase) isPredecessor(elem DocElementBaseProvider) bool {
@@ -186,6 +190,7 @@ type DocElement struct {
 func (self *DocElement) init(report *report, data map[string]interface{}) {
 	self.DocElementBase.init(report, data)
 	self.ID = GetIntValue(data, "id")
+	self.ZIndex = GetIntValue(data, "zIndex")
 	self.X = float64(GetIntValue(data, "x"))
 	self.Width = float64(GetIntValue(data, "width"))
 	self.Height = float64(GetIntValue(data, "height"))
@@ -368,11 +373,14 @@ func (self *ImageElement) prepare(ctx Context, pdfDoc *FPDFRB, onlyVerify bool) 
 			log.Println(Error{Message: "errorMsgInvalidImage", ObjectID: self.base().ID, Field: "source"})
 		}
 		dataURL, _ := dataurl.DecodeString(imgDataB64)
-		extensions, _ := mime.ExtensionsByType(dataURL.MediaType.ContentType())
+		extensions, _ := mime.ExtensionsByType(dataURL.MediaType.ContentType()) // [.jfif, .jpe, .jpeg, .jpg]
+
 		invalid := map[string]string{
 			".":    "",
 			".jpe": ".jpg",
+			"jpeg": "jpg",
 			"jpe":  "jpg",
+			"jfif": "jpg",
 		}
 		imageType := extensions[0]
 		for s, r := range invalid {

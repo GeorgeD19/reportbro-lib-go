@@ -96,6 +96,7 @@ func GetStringValue(data map[string]interface{}, key string) string {
 	return ""
 }
 
+// GetIntValue retrieves int value if exists, if not returns 0
 func GetIntValue(data map[string]interface{}, key string) int {
 	if value, ok := data[key]; ok {
 		if typeValue, typeOk := value.(float64); typeOk {
