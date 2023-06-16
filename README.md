@@ -54,7 +54,7 @@ import (
 Install go dependencies
 
 ```
-dep ensure
+go mod tidy
 ```
 
 Install node packages for app example
